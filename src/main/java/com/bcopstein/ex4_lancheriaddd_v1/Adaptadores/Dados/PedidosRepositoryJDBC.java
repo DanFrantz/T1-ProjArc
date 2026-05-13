@@ -12,15 +12,19 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Dados.PedidosRepository;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Dados.ProdutosRepository;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.ItemPedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Produto;
 
 @Component
 public class PedidosRepositoryJDBC implements PedidosRepository {
     private JdbcTemplate jdbcTemplate;
+    private ProdutosRepository produtosRepository;
 
-    public PedidosRepositoryJDBC(JdbcTemplate jdbcTemplate) {
+    public PedidosRepositoryJDBC(JdbcTemplate jdbcTemplate, ProdutosRepository produtosRepository) {
         this.jdbcTemplate = jdbcTemplate;
+        this.produtosRepository = produtosRepository;
     }
 
     @Override
@@ -74,6 +78,24 @@ public class PedidosRepositoryJDBC implements PedidosRepository {
             ps -> ps.setLong(1, idPedido),
             (rs, rowNum) -> Pedido.Status.valueOf(rs.getString("status")));
         return status.isEmpty() ? null : status.getFirst();
+    }
+
+    @Override
+    public List<ItemPedido> recuperaItensPorId(long idPedido) {
+        String sql = "SELECT produto_id, quantidade FROM itens_pedido WHERE pedido_id = ?";
+        return jdbcTemplate.query(
+            sql,
+            ps -> ps.setLong(1, idPedido),
+            (rs, rowNum) -> {
+                Produto produto = produtosRepository.recuperaProdutoPorid(rs.getLong("produto_id"));
+                return new ItemPedido(produto, rs.getInt("quantidade"));
+            });
+    }
+
+    @Override
+    public void removePorId(long idPedido) {
+        jdbcTemplate.update("DELETE FROM itens_pedido WHERE pedido_id = ?", idPedido);
+        jdbcTemplate.update("DELETE FROM pedidos WHERE id = ?", idPedido);
     }
 
     @Override
