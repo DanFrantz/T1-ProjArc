@@ -29,10 +29,21 @@ public class CardapioController {
         this.recuperaListaCardapioUC = recuperaListaCardapioUC;
     }
 
+    @GetMapping
+    @CrossOrigin("*")
+    public CardapioPresenter recuperaCardapioCorrente(){
+        CardapioResponse cardapioResponse = recuperaCardapioUC.run();
+        return montaCardapioPresenter(cardapioResponse);
+    }
+
     @GetMapping("/{id}")
     @CrossOrigin("*")
     public CardapioPresenter recuperaCardapio(@PathVariable(value="id")long id){
         CardapioResponse cardapioResponse = recuperaCardapioUC.run(id);
+        return montaCardapioPresenter(cardapioResponse);
+    }
+
+    private CardapioPresenter montaCardapioPresenter(CardapioResponse cardapioResponse){
         Set<Long> conjIdSugestoes = new HashSet<>(cardapioResponse.getSugestoesDoChef().stream()
             .map(produto->produto.getId())
             .toList());
