@@ -43,6 +43,21 @@ public class EstoqueService {
                 ingredienteId));
     }
 
+    public void devolveIngredientes(List<ItemPedido> itens) {
+        Map<Long, Integer> ingredientesNecessarios = new HashMap<>();
+        for (ItemPedido item : itens) {
+            calculaIngredientesNecessarios(item)
+                .forEach((ingredienteId, quantidade) ->
+                    ingredientesNecessarios.merge(ingredienteId, quantidade, Integer::sum));
+        }
+
+        ingredientesNecessarios.forEach((ingredienteId, quantidade) ->
+            jdbcTemplate.update(
+                "UPDATE itensEstoque SET quantidade = quantidade + ? WHERE ingrediente_id = ?",
+                quantidade,
+                ingredienteId));
+    }
+
     private Map<Long, Integer> recuperaEstoqueDisponivel() {
         String sql = "SELECT ingrediente_id, quantidade FROM itensEstoque";
         Map<Long, Integer> estoque = new HashMap<>();
