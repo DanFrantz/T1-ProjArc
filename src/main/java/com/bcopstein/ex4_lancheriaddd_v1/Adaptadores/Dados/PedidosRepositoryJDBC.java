@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -63,6 +64,16 @@ public class PedidosRepositoryJDBC implements PedidosRepository {
             pedido.getImpostos(),
             pedido.getDesconto(),
             pedido.getValorCobrado());
+    }
+
+    @Override
+    public Pedido.Status recuperaStatusPorId(long idPedido) {
+        String sql = "SELECT status FROM pedidos WHERE id = ?";
+        List<Pedido.Status> status = jdbcTemplate.query(
+            sql,
+            ps -> ps.setLong(1, idPedido),
+            (rs, rowNum) -> Pedido.Status.valueOf(rs.getString("status")));
+        return status.isEmpty() ? null : status.getFirst();
     }
 
     @Override
