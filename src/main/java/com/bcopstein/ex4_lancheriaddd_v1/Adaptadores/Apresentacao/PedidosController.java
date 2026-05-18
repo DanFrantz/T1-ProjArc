@@ -19,19 +19,9 @@ import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.StatusPedidoRespons
 
 @RestController
 @RequestMapping("/pedidos")
-public class PedidosController {
-    private SubmeterPedidoParaAprovacaoUC submeterPedidoParaAprovacaoUC;
-    private SolicitarStatusPedidoUC solicitarStatusPedidoUC;
-    private CancelarPedidoUC cancelarPedidoUC;
-
-    public PedidosController(SubmeterPedidoParaAprovacaoUC submeterPedidoParaAprovacaoUC,
-                             SolicitarStatusPedidoUC solicitarStatusPedidoUC,
-                             CancelarPedidoUC cancelarPedidoUC) {
-        this.submeterPedidoParaAprovacaoUC = submeterPedidoParaAprovacaoUC;
-        this.solicitarStatusPedidoUC = solicitarStatusPedidoUC;
-        this.cancelarPedidoUC = cancelarPedidoUC;
-    }
-
+public record PedidosController(SubmeterPedidoParaAprovacaoUC submeterPedidoParaAprovacaoUC,
+                                SolicitarStatusPedidoUC solicitarStatusPedidoUC,
+                                CancelarPedidoUC cancelarPedidoUC) {
     @PostMapping("/aprovacao")
     @CrossOrigin("*")
     public PedidoResponse submeteParaAprovacao(@RequestBody SubmeterPedidoRequest request) {

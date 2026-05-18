@@ -1,7 +1,12 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Apresentacao.Presenters;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.CardapioResponse;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Produto;
 
 public class CardapioPresenter {
     public class ItemCardapioPresenter{
@@ -56,5 +61,17 @@ public class CardapioPresenter {
 
     public void add(ItemCardapioPresenter item){
         itens.add(item);
+    }
+
+    public static CardapioPresenter from(CardapioResponse cardapioResponse) {
+        Set<Long> conjIdSugestoes = new HashSet<>(cardapioResponse.getSugestoesDoChef().stream()
+            .map(produto -> produto.getId())
+            .toList());
+        CardapioPresenter cardapioPresenter = new CardapioPresenter(cardapioResponse.getCardapio().getCabecalhoCardapio().titulo());
+        for (Produto produto : cardapioResponse.getCardapio().getProdutos()) {
+            boolean sugestao = conjIdSugestoes.contains(produto.getId());
+            cardapioPresenter.insereItem(produto.getId(), produto.getDescricao(), produto.getPreco(), sugestao);
+        }
+        return cardapioPresenter;
     }
 }
