@@ -18,17 +18,53 @@ public class ClientesRepositoryJDBC implements ClientesRepository {
 
     @Override
     public Cliente recuperaPorEmail(String email) {
-        String sql = "SELECT cpf, nome, celular, endereco, email FROM clientes WHERE email = ?";
+        String sql = "SELECT cpf, nome, celular, endereco, email, senha FROM clientes WHERE email = ?";
         List<Cliente> clientes = jdbcTemplate.query(
             sql,
             ps -> ps.setString(1, email),
-            (rs, rowNum) -> new Cliente(
-                rs.getString("cpf"),
-                rs.getString("nome"),
-                rs.getString("celular"),
-                rs.getString("endereco"),
-                rs.getString("email"))
+            (rs, rowNum) -> montaCliente(rs.getString("cpf"),
+                                         rs.getString("nome"),
+                                         rs.getString("celular"),
+                                         rs.getString("endereco"),
+                                         rs.getString("email"),
+                                         rs.getString("senha"))
         );
         return clientes.isEmpty() ? null : clientes.getFirst();
+    }
+
+    @Override
+    public Cliente recuperaPorCpf(String cpf) {
+        String sql = "SELECT cpf, nome, celular, endereco, email, senha FROM clientes WHERE cpf = ?";
+        List<Cliente> clientes = jdbcTemplate.query(
+            sql,
+            ps -> ps.setString(1, cpf),
+            (rs, rowNum) -> montaCliente(rs.getString("cpf"),
+                                         rs.getString("nome"),
+                                         rs.getString("celular"),
+                                         rs.getString("endereco"),
+                                         rs.getString("email"),
+                                         rs.getString("senha"))
+        );
+        return clientes.isEmpty() ? null : clientes.getFirst();
+    }
+
+    @Override
+    public Cliente salva(Cliente cliente) {
+        String sql = """
+            INSERT INTO clientes (cpf, nome, celular, endereco, email, senha)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """;
+        jdbcTemplate.update(sql,
+            cliente.getCpf(),
+            cliente.getNome(),
+            cliente.getCelular(),
+            cliente.getEndereco(),
+            cliente.getEmail(),
+            cliente.getSenha());
+        return cliente;
+    }
+
+    private Cliente montaCliente(String cpf, String nome, String celular, String endereco, String email, String senha) {
+        return new Cliente(cpf, nome, celular, endereco, email, senha);
     }
 }
