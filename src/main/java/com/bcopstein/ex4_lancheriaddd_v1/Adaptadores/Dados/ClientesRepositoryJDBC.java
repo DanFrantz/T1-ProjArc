@@ -54,4 +54,20 @@ public class ClientesRepositoryJDBC implements ClientesRepository {
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, email);
         return count != null && count > 0;
     }
+    @Override
+    public Cliente recuperaPorCpf(String cpf) {
+        String sql = "SELECT cpf, nome, celular, endereco, email, senha FROM clientes WHERE cpf = ?";
+        List<Cliente> clientes = jdbcTemplate.query(
+            sql,
+            ps -> ps.setString(1, cpf),
+            (rs, rowNum) -> new Cliente(
+                rs.getString("cpf"),
+                rs.getString("nome"),
+                rs.getString("celular"),
+                rs.getString("endereco"),
+                rs.getString("email"),
+                rs.getString("senha"))
+        );
+        return clientes.isEmpty() ? null : clientes.getFirst();
+        }
 }

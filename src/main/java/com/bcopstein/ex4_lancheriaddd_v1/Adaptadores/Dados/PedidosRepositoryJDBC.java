@@ -153,7 +153,7 @@ public class PedidosRepositoryJDBC implements PedidosRepository {
             (rs, rowNum) -> {
                 long id = rs.getLong("id");
                 String cpf = rs.getString("cliente_cpf");
-                Cliente cliente = clientesRepository.recuperaPorEmail(cpf);
+                Cliente cliente = clientesRepository.recuperaPorCpf(cpf);
                 Timestamp ts = rs.getTimestamp("data_hora_pagamento");
                 List<ItemPedido> itens = recuperaItensPorId(id);
                 return new Pedido(
@@ -166,6 +166,14 @@ public class PedidosRepositoryJDBC implements PedidosRepository {
                     rs.getDouble("impostos"),
                     rs.getDouble("desconto"),
                     rs.getDouble("valor_cobrado"));
-            });
+            });}
+
+    @Override
+    public void atualizaStatusEDataPagamento(long idPedido, Pedido.Status status, LocalDateTime dataHoraPagamento) {
+        jdbcTemplate.update(
+            "UPDATE pedidos SET status = ?, data_hora_pagamento = ? WHERE id = ?",
+            status.name(),
+            Timestamp.valueOf(dataHoraPagamento),
+            idPedido);
     }
 }

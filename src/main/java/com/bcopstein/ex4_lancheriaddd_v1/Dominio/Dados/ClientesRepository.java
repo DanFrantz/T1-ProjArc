@@ -6,4 +6,5 @@ public interface ClientesRepository {
     Cliente recuperaPorEmail(String email);
     Cliente salva(Cliente cliente);
     boolean existePorEmail(String email);
+    Cliente recuperaPorCpf(String cpf);
 }

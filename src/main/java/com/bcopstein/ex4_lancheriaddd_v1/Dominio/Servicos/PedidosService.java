@@ -97,7 +97,7 @@ public class PedidosService {
             throw new IllegalStateException("Pagamento recusado para o pedido: " + idPedido);
         }
 
-        pedidosRepository.atualizaStatus(idPedido, Pedido.Status.PAGO);
+        pedidosRepository.atualizaStatusEDataPagamento(idPedido, Pedido.Status.PAGO, LocalDateTime.now());
         cozinhaService.chegadaDePedido(idPedido);
     }
 
