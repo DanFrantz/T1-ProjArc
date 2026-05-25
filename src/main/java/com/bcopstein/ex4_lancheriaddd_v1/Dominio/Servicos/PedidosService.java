@@ -1,5 +1,6 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -12,7 +13,7 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Cliente;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.ItemPedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Produto;
-
+ 
 @Service
 public class PedidosService {
     private ClientesRepository clientesRepository;
@@ -21,25 +22,32 @@ public class PedidosService {
     private ImpostosService impostosService;
     private DescontosService descontosService;
     private PedidosRepository pedidosRepository;
+    private IPagamentoService pagamentoService;
+    private ICozinhaService cozinhaService;
 
-    public PedidosService(ClientesRepository clientesRepository,
-                          ProdutosRepository produtosRepository,
-                          EstoqueService estoqueService,
-                          ImpostosService impostosService,
-                          DescontosService descontosService,
-                          PedidosRepository pedidosRepository) {
-        this.clientesRepository = clientesRepository;
-        this.produtosRepository = produtosRepository;
-        this.estoqueService = estoqueService;
-        this.impostosService = impostosService;
-        this.descontosService = descontosService;
-        this.pedidosRepository = pedidosRepository;
+    public PedidosService(
+    ClientesRepository clientesRepository,
+    ProdutosRepository produtosRepository,
+    EstoqueService estoqueService,
+    ImpostosService impostosService,
+    DescontosService descontosService,
+    PedidosRepository pedidosRepository,
+    IPagamentoService pagamentoService,
+    ICozinhaService cozinhaService){
+    this.clientesRepository = clientesRepository;
+    this.produtosRepository = produtosRepository;
+    this.estoqueService = estoqueService;
+    this.impostosService = impostosService;
+    this.descontosService = descontosService;
+    this.pedidosRepository = pedidosRepository;
+    this.pagamentoService = pagamentoService;
+    this.cozinhaService = cozinhaService;
     }
 
     @Transactional
     public ResultadoPedidoAprovacao submeteParaAprovacao(String emailCliente,
-                                                         String enderecoEntrega,
-                                                         List<ItemPedidoSolicitado> itensSolicitados) {
+    String enderecoEntrega,
+    List<ItemPedidoSolicitado> itensSolicitados) {
         Cliente cliente = clientesRepository.recuperaPorEmail(emailCliente);
         if (cliente == null) {
             throw new IllegalArgumentException("Cliente nao encontrado");
@@ -75,6 +83,22 @@ public class PedidosService {
         estoqueService.baixaIngredientes(itens);
         Pedido pedidoSalvo = pedidosRepository.salva(pedido, enderecoEntrega);
         return new ResultadoPedidoAprovacao(pedidoSalvo, List.of());
+    }
+ 
+    @Transactional
+    public void pagaPedido(long idPedido) {
+        Pedido.Status status = consultaStatus(idPedido);
+        if (status != Pedido.Status.APROVADO) {
+            throw new IllegalStateException("Pedido nao pode ser pago no status: " + status.name());
+        }
+ 
+        boolean pagamentoAprovado = pagamentoService.processaPagamento(idPedido, 0);
+        if (!pagamentoAprovado) {
+            throw new IllegalStateException("Pagamento recusado para o pedido: " + idPedido);
+        }
+
+        pedidosRepository.atualizaStatus(idPedido, Pedido.Status.PAGO);
+        cozinhaService.chegadaDePedido(idPedido);
     }
 
     public Pedido.Status consultaStatus(long idPedido) {

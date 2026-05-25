@@ -18,7 +18,7 @@ public class ClientesRepositoryJDBC implements ClientesRepository {
 
     @Override
     public Cliente recuperaPorEmail(String email) {
-        String sql = "SELECT cpf, nome, celular, endereco, email FROM clientes WHERE email = ?";
+        String sql = "SELECT cpf, nome, celular, endereco, email, senha FROM clientes WHERE email = ?";
         List<Cliente> clientes = jdbcTemplate.query(
             sql,
             ps -> ps.setString(1, email),
@@ -27,8 +27,31 @@ public class ClientesRepositoryJDBC implements ClientesRepository {
                 rs.getString("nome"),
                 rs.getString("celular"),
                 rs.getString("endereco"),
-                rs.getString("email"))
+                rs.getString("email"),
+                rs.getString("senha"))
         );
         return clientes.isEmpty() ? null : clientes.getFirst();
+    }
+
+    @Override
+    public Cliente salva(Cliente cliente){
+        String sql = """
+            INSERT INTO clientes (cpf, nome, celular, endereco, email, senha)
+            VALUES (?,?,?,?,?,?)
+            """;
+        jdbcTemplate.update(sql,
+            cliente.getCpf(),
+            cliente.getNome(),
+            cliente.getCelular(),
+            cliente.getEndereco(),
+            cliente.getEmail(),
+            cliente.getSenha());
+        return cliente;
+    }
+    @Override
+    public boolean existePorEmail(String email) {
+        String sql = "SELECT COUNT(*) FROM clientes WHERE email = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, email);
+        return count != null && count > 0;
     }
 }

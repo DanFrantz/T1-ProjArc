@@ -1,54 +1,59 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos;
-
+ 
 import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.stereotype.Service;
+
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Dados.PedidosRepository;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
 
+@Service
 public class CozinhaService implements ICozinhaService {
-    private Queue<Pedido> filaEntrada;
-    private Pedido emPreparacao;
-    private Queue<Pedido> filaSaida;
-
+    private PedidosRepository pedidosRepository;
+    private IEntregaService entregaService;
+    private Queue<Long> filaEntrada;
+    private Long emPreparacao;
     private ScheduledExecutorService scheduler;
 
-    public CozinhaService() {
-        filaEntrada = new LinkedBlockingQueue<Pedido>();
-        emPreparacao = null;
-        filaSaida = new LinkedBlockingQueue<Pedido>();
-        scheduler = Executors.newSingleThreadScheduledExecutor();
-    }
-
-    private synchronized void colocaEmPreparacao(Pedido pedido){
-        pedido.setStatus(Pedido.Status.PREPARACAO);
-        emPreparacao = pedido;
-        System.out.println("Pedido em preparacao: "+pedido);
-        // Agenda pedidoPronto para ser chamado em 5 segundos
-        scheduler.schedule(() -> pedidoPronto(), 5, TimeUnit.SECONDS);
+    public CozinhaService(PedidosRepository pedidosRepository, IEntregaService entregaService) {
+        this.pedidosRepository = pedidosRepository;
+        this.entregaService = entregaService;
+        this.filaEntrada = new LinkedBlockingQueue<>();
+        this.emPreparacao = null;
+        this.scheduler = Executors.newSingleThreadScheduledExecutor();
     }
 
     @Override
-    public synchronized void chegadaDePedido(Pedido p) {
-        filaEntrada.add(p);
-        System.out.println("Pedido na fila de entrada: "+p);
+    public synchronized void chegadaDePedido(long idPedido) {
+        pedidosRepository.atualizaStatus(idPedido, Pedido.Status.AGUARDANDO);
+        filaEntrada.add(idPedido);
+        System.out.println("Pedido " + idPedido + " aguardando na cozinha");
         if (emPreparacao == null) {
             colocaEmPreparacao(filaEntrada.poll());
         }
     }
+ 
+    private synchronized void colocaEmPreparacao(long idPedido) {
+        emPreparacao = idPedido;
+        pedidosRepository.atualizaStatus(idPedido, Pedido.Status.PREPARACAO);
+        System.out.println("Pedido " + idPedido + " em preparacao");
+        scheduler.schedule(() -> pedidoPronto(), 5, TimeUnit.SECONDS);
+    }
 
     @Override
     public synchronized void pedidoPronto() {
-        emPreparacao.setStatus(Pedido.Status.PRONTO);
-        filaSaida.add(emPreparacao);
-        System.out.println("Pedido na fila de saida: "+emPreparacao);
+        long idPedido = emPreparacao;
+        pedidosRepository.atualizaStatus(idPedido, Pedido.Status.PRONTO);
+        System.out.println("Pedido " + idPedido + " pronto");
         emPreparacao = null;
-        // Se tem pedidos na fila, programa a preparação para daqui a 1 segundo
-        if (!filaEntrada.isEmpty()){
-            Pedido prox = filaEntrada.poll();
-            scheduler.schedule(() -> colocaEmPreparacao(prox), 1, TimeUnit.SECONDS);
+       entregaService.chegadaDePedido(idPedido);
+         if (!filaEntrada.isEmpty()) {
+            long proximo = filaEntrada.poll();
+            scheduler.schedule(() -> colocaEmPreparacao(proximo), 1, TimeUnit.SECONDS);
         }
     }
 }
