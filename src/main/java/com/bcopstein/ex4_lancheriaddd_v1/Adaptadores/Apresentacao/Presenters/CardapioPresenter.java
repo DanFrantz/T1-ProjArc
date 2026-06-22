@@ -14,12 +14,14 @@ public class CardapioPresenter {
         private String descricao;
         private int preco;
         private boolean indicacao;
+        private boolean disponivel;
         
-        public ItemCardapioPresenter(Long id, String descricao, int preco, boolean indicacao) {
+        public ItemCardapioPresenter(Long id, String descricao, int preco, boolean indicacao, boolean disponivel) {
             this.id = id;
             this.descricao = descricao;
             this.preco = preco;
             this.indicacao = indicacao;
+            this.disponivel = disponivel;
         }
 
         public Long getId() {
@@ -37,6 +39,10 @@ public class CardapioPresenter {
         public boolean isIndicacao() {
             return indicacao;
         }
+
+        public boolean isDisponivel() {
+            return disponivel;
+        }
     }
 
     private String titulo;
@@ -51,8 +57,8 @@ public class CardapioPresenter {
         return titulo;
     }
 
-    public void insereItem(long id,String titulo,int preco,boolean sugestao){
-        itens.add(new ItemCardapioPresenter(id, titulo, preco, sugestao));
+    public void insereItem(long id,String titulo,int preco,boolean sugestao, boolean disponivel){
+        itens.add(new ItemCardapioPresenter(id, titulo, preco, sugestao, disponivel));
     }
     
     public List<ItemCardapioPresenter> getItens() {
@@ -70,7 +76,7 @@ public class CardapioPresenter {
         CardapioPresenter cardapioPresenter = new CardapioPresenter(cardapioResponse.getCardapio().getCabecalhoCardapio().titulo());
         for (Produto produto : cardapioResponse.getCardapio().getProdutos()) {
             boolean sugestao = conjIdSugestoes.contains(produto.getId());
-            cardapioPresenter.insereItem(produto.getId(), produto.getDescricao(), produto.getPreco(), sugestao);
+            cardapioPresenter.insereItem(produto.getId(), produto.getDescricao(), produto.getPreco(), sugestao, produto.isDisponivel());
         }
         return cardapioPresenter;
     }

@@ -61,6 +61,7 @@ public class PedidosRepositoryJDBC implements PedidosRepository {
                 item.getItem().getId(),
                 item.getQuantidade());
         }
+        registraStatus(idPedido, pedido.getStatus(), LocalDateTime.now());
 
         return new Pedido(
             idPedido,
@@ -98,6 +99,7 @@ public class PedidosRepositoryJDBC implements PedidosRepository {
 
     @Override
     public void removePorId(long idPedido) {
+        jdbcTemplate.update("DELETE FROM historico_status_pedido WHERE pedido_id = ?", idPedido);
         jdbcTemplate.update("DELETE FROM itens_pedido WHERE pedido_id = ?", idPedido);
         jdbcTemplate.update("DELETE FROM pedidos WHERE id = ?", idPedido);
     }
@@ -115,6 +117,16 @@ public class PedidosRepositoryJDBC implements PedidosRepository {
             "UPDATE pedidos SET status = ? WHERE id = ?",
             status.name(),
             idPedido);
+        registraStatus(idPedido, status, LocalDateTime.now());
+    }
+
+    @Override
+    public void registraStatus(long idPedido, Pedido.Status status, LocalDateTime dataHora) {
+        jdbcTemplate.update(
+            "INSERT INTO historico_status_pedido (pedido_id, status, data_hora) VALUES (?, ?, ?)",
+            idPedido,
+            status.name(),
+            Timestamp.valueOf(dataHora));
     }
  
     @Override
@@ -175,5 +187,6 @@ public class PedidosRepositoryJDBC implements PedidosRepository {
             status.name(),
             Timestamp.valueOf(dataHoraPagamento),
             idPedido);
+        registraStatus(idPedido, status, dataHoraPagamento);
     }
 }

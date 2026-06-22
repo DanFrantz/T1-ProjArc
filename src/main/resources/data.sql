@@ -50,6 +50,9 @@ INSERT INTO produtos (id,descricao,preco) VALUES (1,'Pizza calabresa',5500);
 INSERT INTO produtos (id,descricao,preco) VALUES (2,'Pizza queijo e presunto',6000);
 INSERT INTO produtos (id,descricao,preco) VALUES (3,'Pizza margherita',4000);
 
+INSERT INTO configuracoes (chave, valor) VALUES ('CARDAPIO_CORRENTE', '1');
+INSERT INTO configuracoes (chave, valor) VALUES ('DESCONTO_CORRENTE', 'FIDELIDADE_7');
+
 -- Associação dos produtos com as receitas
 INSERT INTO produto_receita (produto_id,receita_id) VALUES(1,1);
 INSERT INTO produto_receita (produto_id,receita_id) VALUES(2,2);

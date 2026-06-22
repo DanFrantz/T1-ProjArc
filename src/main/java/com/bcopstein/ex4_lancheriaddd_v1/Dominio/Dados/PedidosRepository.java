@@ -13,6 +13,7 @@ public interface PedidosRepository {
     void removePorId(long idPedido);
     int contaPedidosClienteDesde(String cpfCliente, LocalDateTime dataInicial);
     void atualizaStatus(long idPedido, Pedido.Status status);
+    void registraStatus(long idPedido, Pedido.Status status, LocalDateTime dataHora);
     List<Pedido> recuperaEntreguesEntre(LocalDateTime inicio, LocalDateTime fim);
     List<Pedido> recuperaEntreguesClienteEntre(String cpfCliente, LocalDateTime inicio, LocalDateTime fim);
     void atualizaStatusEDataPagamento(long idPedido, Pedido.Status status, LocalDateTime dataHoraPagamento);

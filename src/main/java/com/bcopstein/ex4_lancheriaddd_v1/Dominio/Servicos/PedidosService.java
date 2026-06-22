@@ -1,7 +1,9 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,10 +59,20 @@ public class PedidosService {
             .map(item -> criaItemPedido(item.produtoId(), item.quantidade()))
             .toList();
 
-        var produtosSemEstoque = estoqueService.produtosSemEstoque(itens);
-        if (!produtosSemEstoque.isEmpty()) {
+        Map<Long, Produto> produtosIndisponiveis = new LinkedHashMap<>();
+        itens.stream()
+            .map(ItemPedido::getItem)
+            .filter(produto -> !produto.isDisponivel())
+            .forEach(produto -> produtosIndisponiveis.put(produto.getId(), produto));
+
+        estoqueService.produtosSemEstoque(itens).forEach(produto -> {
+            produtosRepository.marcaIndisponivel(produto.getId());
+            produtosIndisponiveis.put(produto.getId(), produto);
+        });
+
+        if (!produtosIndisponiveis.isEmpty()) {
             Pedido pedido = new Pedido(0, cliente, null, itens, Pedido.Status.NOVO, 0, 0, 0, 0);
-            return new ResultadoPedidoAprovacao(pedido, produtosSemEstoque);
+            return new ResultadoPedidoAprovacao(pedido, List.copyOf(produtosIndisponiveis.values()));
         }
 
         double valorItens = itens.stream()
@@ -75,14 +87,25 @@ public class PedidosService {
             cliente,
             null,
             itens,
-            Pedido.Status.APROVADO,
+            Pedido.Status.NOVO,
             valorItens,
             impostos,
             desconto,
             valorCobrado);
         estoqueService.baixaIngredientes(itens);
         Pedido pedidoSalvo = pedidosRepository.salva(pedido, enderecoEntrega);
-        return new ResultadoPedidoAprovacao(pedidoSalvo, List.of());
+        pedidosRepository.atualizaStatus(pedidoSalvo.getId(), Pedido.Status.APROVADO);
+        Pedido pedidoAprovado = new Pedido(
+            pedidoSalvo.getId(),
+            pedidoSalvo.getCliente(),
+            pedidoSalvo.getDataHoraPagamento(),
+            pedidoSalvo.getItens(),
+            Pedido.Status.APROVADO,
+            pedidoSalvo.getValor(),
+            pedidoSalvo.getImpostos(),
+            pedidoSalvo.getDesconto(),
+            pedidoSalvo.getValorCobrado());
+        return new ResultadoPedidoAprovacao(pedidoAprovado, List.of());
     }
  
     @Transactional
