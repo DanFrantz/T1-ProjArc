@@ -1,0 +1,40 @@
+services:
+  name-server:
+    build:
+      context: ./name-server
+    container_name: pizzaria-name-server
+    ports:
+      - "8761:8761"
+    networks:
+      - pizzaria-net
+
+  pizzaria-service:
+    build:
+      context: .
+    container_name: pizzaria-service
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://name-server:8761/eureka
+      PIZZARIA_IMPOSTO_LEI: LEI_10
+    depends_on:
+      - name-server
+    networks:
+      - pizzaria-net
+
+  gateway:
+    build:
+      context: ./gateway
+    container_name: pizzaria-gateway
+    ports:
+      - "8081:8081"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://name-server:8761/eureka
+      JWT_SECRET: chave-de-seguranca-pizzaria-precisa-de-muitos-caracteres
+    depends_on:
+      - name-server
+      - pizzaria-service
+    networks:
+      - pizzaria-net
+
+networks:
+  pizzaria-net:
+    driver: bridge
