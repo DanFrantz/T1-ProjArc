@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.DefinirCardapioCorrenteUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.DefinirPoliticaDescontoUC;
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.ListarImpostosUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.ListarPoliticasDescontoUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Requests.DefinirCardapioCorrenteRequest;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Requests.DefinirPoliticaDescontoRequest;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.CardapioCorrenteResponse;
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.ImpostosResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.PoliticaDescontoCorrenteResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.PoliticasDescontoResponse;
 
@@ -20,7 +22,8 @@ import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.PoliticasDescontoRe
 @RequestMapping("/admin")
 public record AdminController(DefinirCardapioCorrenteUC definirCardapioCorrenteUC,
                               ListarPoliticasDescontoUC listarPoliticasDescontoUC,
-                              DefinirPoliticaDescontoUC definirPoliticaDescontoUC) {
+                              DefinirPoliticaDescontoUC definirPoliticaDescontoUC,
+                              ListarImpostosUC listarImpostosUC) {
 
     @PutMapping("/cardapio-corrente")
     @CrossOrigin("*")
@@ -39,5 +42,11 @@ public record AdminController(DefinirCardapioCorrenteUC definirCardapioCorrenteU
     public PoliticaDescontoCorrenteResponse definePoliticaDescontoCorrente(
             @RequestBody DefinirPoliticaDescontoRequest request) {
         return definirPoliticaDescontoUC.run(request);
+    }
+
+    @GetMapping("/impostos")
+    @CrossOrigin("*")
+    public ImpostosResponse listaImpostos() {
+        return listarImpostosUC.run();
     }
 }

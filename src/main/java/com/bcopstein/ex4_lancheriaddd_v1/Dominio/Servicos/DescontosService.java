@@ -1,6 +1,5 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos;
 
-import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,21 +7,18 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Dados.DescontoCorrenteRepository;
-import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Dados.PedidosRepository;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Cliente;
 
 @Service
 public class DescontosService {
-    private PedidosRepository pedidosRepository;
     private DescontoCorrenteRepository descontoCorrenteRepository;
     private Map<String, PoliticaDesconto> politicas;
 
-    public DescontosService(PedidosRepository pedidosRepository,
-                            DescontoCorrenteRepository descontoCorrenteRepository) {
-        this.pedidosRepository = pedidosRepository;
+    public DescontosService(DescontoCorrenteRepository descontoCorrenteRepository,
+                            List<PoliticaDesconto> politicasDisponiveis) {
         this.descontoCorrenteRepository = descontoCorrenteRepository;
         this.politicas = new LinkedHashMap<>();
-        registraPoliticas();
+        politicasDisponiveis.forEach(politica -> this.politicas.put(politica.codigo(), politica));
     }
 
     public double calcula(Cliente cliente, double valorItens) {
@@ -55,69 +51,4 @@ public class DescontosService {
         return politica;
     }
 
-    private void registraPoliticas() {
-        registra(new PoliticaDesconto() {
-            @Override
-            public String codigo() {
-                return "SEM_DESCONTO";
-            }
-
-            @Override
-            public String descricao() {
-                return "Sem desconto";
-            }
-
-            @Override
-            public double calcula(Cliente cliente, double valorItens) {
-                return 0;
-            }
-        });
-
-        registra(new PoliticaDesconto() {
-            @Override
-            public String codigo() {
-                return "FIDELIDADE_7";
-            }
-
-            @Override
-            public String descricao() {
-                return "7% para clientes com mais de 3 pedidos nos ultimos 20 dias";
-            }
-
-            @Override
-            public double calcula(Cliente cliente, double valorItens) {
-                return calculaFidelidade(cliente, valorItens);
-            }
-        });
-
-        registra(new PoliticaDesconto() {
-            @Override
-            public String codigo() {
-                return "PROMOCAO_10";
-            }
-
-            @Override
-            public String descricao() {
-                return "Promocao geral de 10%";
-            }
-
-            @Override
-            public double calcula(Cliente cliente, double valorItens) {
-                return valorItens * 0.10;
-            }
-        });
-    }
-
-    private void registra(PoliticaDesconto politica) {
-        politicas.put(politica.codigo(), politica);
-    }
-
-    private double calculaFidelidade(Cliente cliente, double valorItens) {
-        LocalDateTime vinteDiasAtras = LocalDateTime.now().minusDays(20);
-        int pedidosRecentes = pedidosRepository.contaPedidosClienteDesde(cliente.getCpf(), vinteDiasAtras);
-        if (pedidosRecentes > 3) {
-            return valorItens * 0.07;
-        }
-        return 0;
-    }
 }
