@@ -8,13 +8,16 @@ spring:
     password:
   sql:
     init:
-      mode: always   # executa schema.sql no boot
+      mode: always
     schema-locations: classpath:schema.sql
     data-locations: classpath:data.sql
   h2:
     console:
       enabled: true
       path: /h2
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
 logging:
   level:
     org:
@@ -30,3 +33,6 @@ eureka:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka}
   instance:
     prefer-ip-address: true
+pizzaria:
+  entregas:
+    queue: ${PIZZARIA_ENTREGAS_QUEUE:pizzaria.entregas}

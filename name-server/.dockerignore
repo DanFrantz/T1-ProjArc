@@ -1,4 +1,7 @@
 target
 .git
+<<<<<<< HEAD
 .idea
 *.iml
+=======
+>>>>>>> 0cce182 (Microsserviços de estoque entregar isolados e micro serviço)

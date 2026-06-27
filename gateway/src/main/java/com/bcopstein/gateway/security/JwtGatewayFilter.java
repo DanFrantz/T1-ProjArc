@@ -55,6 +55,7 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered {
         return path.equals("/auth/login")
             || path.equals("/")
             || path.equals("/clientes")
+            || path.startsWith("/h2/")
             || path.startsWith("/actuator")
             || path.startsWith("/eureka");
     }

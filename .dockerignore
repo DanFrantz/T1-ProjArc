@@ -1,4 +1,13 @@
 target
+<<<<<<< HEAD
 .git
 .idea
 *.iml
+=======
+out
+.git
+.mvn
+mvnw
+mvnw.cmd
+*.puml
+>>>>>>> 0cce182 (Microsserviços de estoque entregar isolados e micro serviço)

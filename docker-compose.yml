@@ -8,15 +8,51 @@ services:
     networks:
       - pizzaria-net
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - pizzaria-net
+
+  estoque-service:
+    build:
+      context: ./estoque-service
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://name-server:8761/eureka
+    depends_on:
+      - name-server
+    networks:
+      - pizzaria-net
+
   pizzaria-service:
     build:
       context: .
     container_name: pizzaria-service
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://name-server:8761/eureka
+      SPRING_RABBITMQ_HOST: rabbitmq
+      PIZZARIA_ENTREGAS_QUEUE: pizzaria.entregas
       PIZZARIA_IMPOSTO_LEI: LEI_10
     depends_on:
       - name-server
+      - rabbitmq
+      - estoque-service
+    networks:
+      - pizzaria-net
+
+  entrega-service:
+    build:
+      context: ./entrega-service
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://name-server:8761/eureka
+      SPRING_RABBITMQ_HOST: rabbitmq
+      PIZZARIA_ENTREGAS_QUEUE: pizzaria.entregas
+    depends_on:
+      - name-server
+      - rabbitmq
+      - pizzaria-service
     networks:
       - pizzaria-net
 

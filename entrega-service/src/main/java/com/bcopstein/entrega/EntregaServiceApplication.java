@@ -1,20 +1,21 @@
-package com.bcopstein.gateway;
+package com.bcopstein.entrega;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestClient;
 
 @SpringBootApplication
-public class GatewayApplication {
+public class EntregaServiceApplication {
+
     public static void main(String[] args) {
-        SpringApplication.run(GatewayApplication.class, args);
+        SpringApplication.run(EntregaServiceApplication.class, args);
     }
 
     @Bean
     @LoadBalanced
-    public WebClient.Builder webClientBuilder() {
-        return WebClient.builder();
+    public RestClient.Builder restClientBuilder() {
+        return RestClient.builder();
     }
 }

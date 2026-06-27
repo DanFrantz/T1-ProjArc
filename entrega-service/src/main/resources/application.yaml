@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: entrega-service
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+server:
+  port: 0
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.uuid}
+pizzaria:
+  entregas:
+    queue: ${PIZZARIA_ENTREGAS_QUEUE:pizzaria.entregas}

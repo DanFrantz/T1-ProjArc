@@ -12,9 +12,9 @@
     </parent>
 
     <groupId>com.bcopstein</groupId>
-    <artifactId>name-server</artifactId>
+    <artifactId>estoque-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>name-server</name>
+    <name>estoque-service</name>
 
     <properties>
         <java.version>21</java.version>
@@ -35,8 +35,21 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
