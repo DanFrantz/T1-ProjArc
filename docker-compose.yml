@@ -29,7 +29,6 @@ services:
   pizzaria-service:
     build:
       context: .
-    container_name: pizzaria-service
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://name-server:8761/eureka
       SPRING_RABBITMQ_HOST: rabbitmq
